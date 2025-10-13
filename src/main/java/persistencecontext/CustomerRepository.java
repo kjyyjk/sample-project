@@ -7,4 +7,9 @@ import org.springframework.data.repository.CrudRepository;
 public interface CustomerRepository extends CrudRepository<Customer, Long> {
     @Modifying
     List<Customer> findByLastName(String lastName);
+
+    default void throwIllegalException() {
+        throw new IllegalArgumentException("illegal argument");
+        // throw new CustomException();
+    }
 }

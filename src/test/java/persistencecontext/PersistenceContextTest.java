@@ -4,7 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +23,9 @@ public class PersistenceContextTest {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+    CustomerRepository customerRepository;
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -309,5 +317,75 @@ public class PersistenceContextTest {
                 ));
 
         assertThat(afterRemoveAndFlushCustomers.size()).isEqualTo(0);
+    }
+
+
+    @DisplayName("repository#delete 시에도 쓰기 지연이 적용됨을 확인한다")
+    @Nested
+    class checkDeleteMethodSupportWriteBehind {
+        @Test
+        void aa() {
+            // given
+            Customer customer = new Customer("first name", "last name");
+            entityManager.persist(customer);
+            entityManager.flush();
+            System.out.println("===============================");
+            customerRepository.delete(customer);
+            System.out.println("===============================");
+            entityManager.flush();
+        }
+
+        @Test
+        void aaa() {
+            // given
+            Customer customer1 = new Customer("first name", "last name");
+            Customer customer2 = new Customer("hi", "hello");
+            entityManager.persist(customer1);
+            entityManager.persist(customer2);
+            entityManager.flush();
+            System.out.println("===============================");
+            customerRepository.delete(customer1);
+            customerRepository.delete(customer2);
+            System.out.println("===============================");
+            entityManager.flush();
+        }
+
+        @Test
+        void aaaa() {
+            // given
+            Customer customer1 = new Customer("first name", "last name");
+            Customer customer2 = new Customer("hi", "hello");
+            entityManager.persist(customer1);
+            entityManager.persist(customer2);
+            entityManager.flush();
+            System.out.println("===============================");
+            customerRepository.deleteAll(List.of(customer1, customer2));
+            System.out.println("===============================");
+            entityManager.flush();
+        }
+
+        @Test
+        void aaaaa() {
+            customerRepository.throwIllegalException();
+        }
+
+        @Test
+        void aad() {
+            String queryString = "key1=&key2=value2";
+            String[] split = queryString.split("&");
+            for (String s : split) {
+                String[] split1 = s.split("=");
+                System.out.println(split1[0]);
+                System.out.println(split1[1]);
+            }
+        }
+
+        @Test
+        void aaad() {
+            Map<Object, Object> map = new HashMap<>();
+            map.put("key1", null);
+            Object o = map.get("key1");
+            System.out.println(o == null);
+        }
     }
 }
