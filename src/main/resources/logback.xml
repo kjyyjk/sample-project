@@ -1,0 +1,12 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- %X나 %mdc를 별도로 추가하지 않으면 mdc는 포함되지 않는다-->
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -- ip:%X{ip} %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
