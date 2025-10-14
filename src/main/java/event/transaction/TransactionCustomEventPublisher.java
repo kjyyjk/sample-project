@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -27,7 +26,7 @@ public class TransactionCustomEventPublisher {
     private String message;
 
     @Transactional
-    public void publish() {
+    public void publishBeforeCommitEvent() {
         System.out.println("트랜잭션 이름 : %s, 트랜잭션 활성화 여부 : %s".formatted(
             TransactionSynchronizationManager.getCurrentTransactionName(),
             TransactionSynchronizationManager.isActualTransactionActive())
@@ -36,39 +35,64 @@ public class TransactionCustomEventPublisher {
         long startTime = System.currentTimeMillis();
 
         customEntityRepository.save(new CustomEntity());
-        applicationEventPublisher.publishEvent(new TransactionCustomEvent(this, message));
+        applicationEventPublisher.publishEvent(new BeforeCommitEvent(this, message));
 
         long endTime = System.currentTimeMillis();
         System.out.println("[Publisher] 이벤트 발행 완료 - 소요시간: " + (endTime - startTime) + "ms");
         System.out.println("[Publisher] 다음 작업 계속 진행...\n");
     }
 
-    // public void publish() {
-    //     System.out.println("트랜잭션 시작");
-    //     TransactionStatus transactionStatus = transactionStart();
-    //     applicationEventPublisher.publishEvent(new TransactionCustomEvent(this, message));
-    //     System.out.println("트랜잭션 이름 : %s, 트랜잭션 활성화 여부 : %s".formatted(
-    //         TransactionSynchronizationManager.getCurrentTransactionName(),
-    //         TransactionSynchronizationManager.isActualTransactionActive())
-    //     );
-    //     System.out.println("[Publisher] 이벤트 발행 시작 - Thread: " + Thread.currentThread().getName());
-    //     long startTime = System.currentTimeMillis();
-    //
-    //
-    //     long endTime = System.currentTimeMillis();
-    //     System.out.println("[Publisher] 이벤트 발행 완료 - 소요시간: " + (endTime - startTime) + "ms");
-    //     System.out.println("[Publisher] 다음 작업 계속 진행...\n");
-    //
-    //     System.out.println("트랜잭션 커밋 시작");  // ← 변경
-    //     transactionManager.commit(transactionStatus);
-    //     System.out.println("트랜잭션 커밋 완료");  // ← 추가
-    // }
+    @Transactional
+    public void publishAfterCommitEvent() {
+        System.out.println("트랜잭션 이름 : %s, 트랜잭션 활성화 여부 : %s".formatted(
+            TransactionSynchronizationManager.getCurrentTransactionName(),
+            TransactionSynchronizationManager.isActualTransactionActive())
+        );
+        System.out.println("[Publisher] 이벤트 발행 시작 - Thread: " + Thread.currentThread().getName());
+        long startTime = System.currentTimeMillis();
 
-    private TransactionStatus transactionStart() {
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName("MyTransaction");
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-        return transactionManager.getTransaction(def);
+        customEntityRepository.save(new CustomEntity());
+        applicationEventPublisher.publishEvent(new AfterCommitEvent(this, message));
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("[Publisher] 이벤트 발행 완료 - 소요시간: " + (endTime - startTime) + "ms");
+        System.out.println("[Publisher] 다음 작업 계속 진행...\n");
+    }
+
+    @Transactional
+    public void publishAfterRollbackEvent() {
+        System.out.println("트랜잭션 이름 : %s, 트랜잭션 활성화 여부 : %s".formatted(
+            TransactionSynchronizationManager.getCurrentTransactionName(),
+            TransactionSynchronizationManager.isActualTransactionActive())
+        );
+        System.out.println("[Publisher] 이벤트 발행 시작 - Thread: " + Thread.currentThread().getName());
+        long startTime = System.currentTimeMillis();
+
+        customEntityRepository.save(new CustomEntity());
+        applicationEventPublisher.publishEvent(new AfterRollbackEvent(this, message));
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("[Publisher] 이벤트 발행 완료 - 소요시간: " + (endTime - startTime) + "ms");
+        System.out.println("[Publisher] 다음 작업 계속 진행...\n");
+
+        // throw new IllegalArgumentException("");
+    }
+
+    @Transactional
+    public void publishAfterCompletionEvent() {
+        System.out.println("트랜잭션 이름 : %s, 트랜잭션 활성화 여부 : %s".formatted(
+            TransactionSynchronizationManager.getCurrentTransactionName(),
+            TransactionSynchronizationManager.isActualTransactionActive())
+        );
+        System.out.println("[Publisher] 이벤트 발행 시작 - Thread: " + Thread.currentThread().getName());
+        long startTime = System.currentTimeMillis();
+
+        customEntityRepository.save(new CustomEntity());
+        applicationEventPublisher.publishEvent(new AfterCompletionEvent(this, message));
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("[Publisher] 이벤트 발행 완료 - 소요시간: " + (endTime - startTime) + "ms");
+        System.out.println("[Publisher] 다음 작업 계속 진행...\n");
     }
 
     public void setMessage(String message) {
