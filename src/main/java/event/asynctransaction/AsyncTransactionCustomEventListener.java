@@ -77,22 +77,3 @@ public class AsyncTransactionCustomEventListener {
         );
     }
 }
-
-* 결론
-*
-* 비동기면 트랜잭션 컨텍스트 전파 x.
-*
-* transactional after commit이면 부모 트랜잭션 참여는 되지만 이미 커밋 이후라서 db 작업이 반영되지 않는다.
-* (이미 커밋된 트랜잭션이니.)
-*
-* transactional after commit에서 @Transactional 붙이면 에러 발생함.
-* 부모 트랜잭션이 이미 커밋되었기 때문에 트랜잭션 참여가 불가.
-
-* 만약 after commit에서 트랜잭션 작업을 하려면 requires_new를 사용해야한다.
-*
-* ===================
-* @Async@TransactionalEventListener(aftercommit)에서 insert가 되는 이유는
-* 트랜잭션 비활성화 -> jparepsoitory.save 자체가 새로운 트랜잭션.
-*
-* @TransactionalEventListener(aftercommit)에서 insert가 안되는 이유는
-* 부모 트랜잭션 참여함 -> but 이미 커밋됨.
