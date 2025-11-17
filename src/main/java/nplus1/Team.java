@@ -3,6 +3,8 @@ package nplus1;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.BatchSize;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -17,6 +19,7 @@ public class Team {
     private Long id;
 
     @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
+    // @BatchSize(size = 100)
     private List<Member> members = new ArrayList<>();
 
     public Long getId() {

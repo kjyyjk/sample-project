@@ -148,6 +148,26 @@ class TeamRepositoryTest {
         }
     }
 
-    // TODO
-    // 안전하게 컬렉션 N+1 해결하는법
+    /**
+     * Team.members에 @BatchSize 주석을 해제하고 실행
+     *
+     * fetch join, entity graph 사용 안함.
+     *
+     * 쿼리 살펴보면 in 쿼리로 설정한 사이즈만큼의 member를 한번에 조회하고 있음.
+     * -> 기존 N번의 쿼리 수가 줄어듬. 쿼리 개수 관점에서 N+1 문제 해결
+     *
+     * 메모리 관점에서는?
+     * 컬렉션이어도 조인을 하지 않기 때문에 카테시안 곱이 발생하지 않음.
+     * 별도의 in 쿼리로 member를 조회해오기 때문에 페이지네이션도 문제 없음
+     */
+    @Test
+    void batchsize() {
+        List<Team> teams = teamRepository.findAll();
+        for (Team team : teams) {
+            System.out.println(team.getId());
+            for (Member member : team.getMembers()) {
+                member.getName();
+            }
+        }
+    }
 }
