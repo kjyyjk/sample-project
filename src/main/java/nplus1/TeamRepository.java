@@ -1,4 +1,4 @@
-package nplus1.fetchjoin;
+package nplus1;
 
 import java.util.List;
 

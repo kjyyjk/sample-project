@@ -10,6 +10,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
+import nplus1.Member;
+import nplus1.MemberRepository;
+import nplus1.Team;
+import nplus1.TeamRepository;
 
 /**
  * 결론
@@ -132,7 +136,7 @@ class TeamRepositoryTest {
      * 하이버네이트가 컬렉션 fetch join 문제를 고려해서 db 단의 limit를 사용하지 않고, 메모리로 다 fetch 해서 애플리케이션 단에서 limit 함.
      * 실제로 쿼리 보면 limit가 없음
      * 뭐 의도한대로 결과는 잘나오나,,
-     * 메모리로 전부 로드하는게 문제. OOM 발생 가능.
+     * 페이지네이션을 했음에도 메모리로 전부 로드하는게 문제. + 카테시안 곱 -> 페이지네이션이 있음에도 OOM 발생 가능.
      *
      * 만약 컬렉션이 아니라 그냥 1:1 연관 엔티티를 fetch join하는거라면 경고 없이 db 단에서 limit를 한 행을 가져옴.
      */
